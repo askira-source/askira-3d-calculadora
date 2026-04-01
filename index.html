@@ -94,3 +94,9 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
 </body>
 </html>
 
+
+
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
+});
