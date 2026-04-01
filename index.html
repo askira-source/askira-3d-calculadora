@@ -18,7 +18,6 @@ button{margin-top:15px;width:100%;padding:12px;border:none;border-radius:8px;bac
 button:hover{background:#43a047}
 .result{margin-top:20px;background:#2a2a2a;padding:15px;border-radius:8px;line-height:1.6}
 .codigo{margin-top:10px;background:#000;padding:8px;border-radius:6px;text-align:center;font-weight:bold}
-.lista{margin-top:20px;background:#2a2a2a;padding:10px;border-radius:8px;font-size:14px}
 </style>
 </head>
 
@@ -55,15 +54,10 @@ button:hover{background:#43a047}
 
 <div class="result" id="resultado"></div>
 <div class="codigo" id="codigo"></div>
-
-<div class="lista" id="lista"></div>
-
 </div>
 
 <script>
 function numero(valor){return parseFloat(valor.replace(",","."))||0}
-
-let ultimoCalculo = {}
 
 function calcular(){
 let peso=numero(pesoEl.value)
@@ -85,51 +79,18 @@ let precoComLucro=custoTotal*(1+lucro/100)
 let precoFinal=precoComLucro/(1-taxa/100)
 let lucroFinal=precoFinal-custoTotal
 
-ultimoCalculo = {precoFinal:precoFinal.toFixed(2)}
-
 resultado.innerHTML=`Filamento: R$ ${custoFilamento.toFixed(2)}<br>Energia: R$ ${custoEnergia.toFixed(2)}<br>Desgaste Impressora: R$ ${custoImpressora.toFixed(2)}<br>Taxa fixa: R$ ${taxaFixa.toFixed(2)}<hr>Custo Total: R$ ${custoTotal.toFixed(2)}<br><br>Preço sugerido: <b>R$ ${precoFinal.toFixed(2)}</b><br>Lucro estimado: R$ ${lucroFinal.toFixed(2)}`
 }
 
-function gerarCodigo(){
-if(!ultimoCalculo.precoFinal){
-alert("Calcule antes de gerar o código!")
-return
-}
-
-let codigoProduto = "3DLAB-" + Math.floor(Math.random()*1000000)
-codigo.innerHTML = "Código do produto: "+codigoProduto
-
-// salvar no localStorage
-let lista = JSON.parse(localStorage.getItem("produtos") || "[]")
-
-lista.push({
-codigo: codigoProduto,
-preco: ultimoCalculo.precoFinal
-})
-
-localStorage.setItem("produtos", JSON.stringify(lista))
-
-mostrarLista()
-}
-
-function mostrarLista(){
-let lista = JSON.parse(localStorage.getItem("produtos") || "[]")
-
-listaEl.innerHTML = "<b>Produtos salvos:</b><br>"
-
-lista.forEach(item=>{
-listaEl.innerHTML += `${item.codigo} - R$ ${item.preco}<br>`
-})
-}
+function gerarCodigo(){codigo.innerHTML="Código do produto: 3DLAB-"+Math.floor(Math.random()*1000000)}
 
 // atalhos DOM
-const pesoEl=peso,filamentoEl=filamento,tempoEl=tempo,energiaEl=energia,potenciaEl=potencia,taxaEl=taxa,taxaFixaEl=taxaFixa,lucroEl=lucro,resultado=document.getElementById("resultado"),codigo=document.getElementById("codigo"),listaEl=document.getElementById("lista")
+const pesoEl=peso,filamentoEl=filamento,tempoEl=tempo,energiaEl=energia,potenciaEl=potencia,taxaEl=taxa,taxaFixaEl=taxaFixa,lucroEl=lucro,resultado=document.getElementById("resultado"),codigo=document.getElementById("codigo")
 
-// service worker
+// registrar service worker
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
-
-mostrarLista()
 </script>
 
 </body>
 </html>
+
