@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Impressao Askira 3D LAB</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121212">
+
+<style>
+body{background:#121212;font-family:Arial;color:white;padding:30px;margin:0}
+.container{background:#1e1e1e;padding:25px;max-width:420px;margin:auto;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,0.6)}
+h2{text-align:center;margin-bottom:20px}
+label{display:block;margin-top:12px}
+input{width:100%;padding:10px;margin-top:5px;background:#2a2a2a;border:none;border-radius:6px;color:white;font-size:15px}
+button{margin-top:15px;width:100%;padding:12px;border:none;border-radius:8px;background:#4CAF50;color:white;font-size:16px;cursor:pointer}
+button:hover{background:#43a047}
+.result{margin-top:20px;background:#2a2a2a;padding:15px;border-radius:8px;line-height:1.6}
+.codigo{margin-top:10px;background:#000;padding:8px;border-radius:6px;text-align:center;font-weight:bold}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>Calculadora Impressao Askira 3D LAB</h2>
+
+<label>Peso do modelo (g)</label>
+<input id="peso">
+
+<label>Preço do filamento (R$/kg)</label>
+<input id="filamento">
+
+<label>Tempo de impressão (horas)</label>
+<input id="tempo">
+
+<label>Energia (R$/kWh)</label>
+<input id="energia" placeholder="Ex: 0,89">
+
+<label>Consumo médio impressora (W)</label>
+<input id="potencia" value="120">
+
+<label>Taxa da plataforma (%)</label>
+<input id="taxa" value="20">
+
+<label>Taxa fixa (R$)</label>
+<input id="taxaFixa" value="4">
+
+<label>Margem de lucro (%)</label>
+<input id="lucro">
+
+<button onclick="calcular()">Calcular</button>
+<button onclick="gerarCodigo()">Gerar Código do Produto</button>
+
+<div class="result" id="resultado"></div>
+<div class="codigo" id="codigo"></div>
+</div>
+
+<script>
+function numero(valor){return parseFloat(valor.replace(",","."))||0}
+
+function calcular(){
+let peso=numero(pesoEl.value)
+let filamento=numero(filamentoEl.value)
+let tempo=numero(tempoEl.value)
+let energia=numero(energiaEl.value)
+let potencia=numero(potenciaEl.value)
+let taxa=numero(taxaEl.value)
+let taxaFixa=numero(taxaFixaEl.value)
+let lucro=numero(lucroEl.value)
+
+let custoFilamento=(filamento/1000)*peso
+let consumoKWh=(potencia/1000)*tempo
+let custoEnergia=consumoKWh*energia
+let custoImpressora=0.5*tempo
+
+let custoTotal=custoFilamento+custoEnergia+custoImpressora+taxaFixa
+let precoComLucro=custoTotal*(1+lucro/100)
+let precoFinal=precoComLucro/(1-taxa/100)
+let lucroFinal=precoFinal-custoTotal
+
+resultado.innerHTML=`Filamento: R$ ${custoFilamento.toFixed(2)}<br>Energia: R$ ${custoEnergia.toFixed(2)}<br>Desgaste Impressora: R$ ${custoImpressora.toFixed(2)}<br>Taxa fixa: R$ ${taxaFixa.toFixed(2)}<hr>Custo Total: R$ ${custoTotal.toFixed(2)}<br><br>Preço sugerido: <b>R$ ${precoFinal.toFixed(2)}</b><br>Lucro estimado: R$ ${lucroFinal.toFixed(2)}`
+}
+
+function gerarCodigo(){codigo.innerHTML="Código do produto: 3DLAB-"+Math.floor(Math.random()*1000000)}
+
+// atalhos DOM
+const pesoEl=peso,filamentoEl=filamento,tempoEl=tempo,energiaEl=energia,potenciaEl=potencia,taxaEl=taxa,taxaFixaEl=taxaFixa,lucroEl=lucro,resultado=document.getElementById("resultado"),codigo=document.getElementById("codigo")
+
+// registrar service worker
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+</script>
+
+</body>
+</html>
+
+
+<!-- manifest.json -->
+{
+  "name": "Askira 3D LAB",
+  "short_name": "Askira 3D",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
+
+<!-- sw.js -->
+const CACHE_NAME = 'askira-3d-cache-v1';
+const urlsToCache = ['./','./index.html'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
+});
